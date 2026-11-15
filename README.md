@@ -5,12 +5,16 @@ A tiny Android app that texts **"Refill" to +4980808** for you.
 - **When the carrier texts you** – Lidl Connect's "Deine Unlimited-1GB Option ist
   fast verbraucht … antworte einfach auf diese SMS mit Refill" message is
   recognised when it comes from `80808` and contains `mit Refill` or
-  `fast verbraucht` (both changeable), and answered with "Refill" sent back to
-  +4980808. Confirmations don't match, so they can't trigger another reply. A
+  `fast verbraucht` (both changeable), and answered with "Refill" sent to
+  +4980808. Replies go to the full number on purpose: Android asks "may cause
+  charges" before an app texts a short number like `80808`, which would stall
+  the automation. Confirmations don't match, so they can't trigger another reply. A
   30-second cooldown stops it from ever replying in a loop.
 - **On a timer** – flip "Send repeatedly" and it texts every minute (or every N
   minutes) until you switch it off. A notification stays up while the timer runs,
   and it restarts after a reboot.
+- **Dual SIM:** replies go out on the SIM the carrier SMS arrived on, and the
+  timer uses that SIM too.
 - **Send now** button and an activity log showing every SMS and whether it
   actually went out.
 
