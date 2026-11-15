@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.provider.Telephony;
+import android.telephony.SubscriptionManager;
 import android.telephony.SmsMessage;
 
 import java.util.Locale;
@@ -36,10 +37,18 @@ public class SmsReceiver extends BroadcastReceiver {
             return;
         }
         Prefs.setLastAutoReply(context, now);
+
+        // Reply from the SIM the message arrived on (matters on dual-SIM phones), and
+        // remember it so the timer uses the same SIM.
+        int subId = intent.getIntExtra(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX,
+                intent.getIntExtra("subscription", -1));
+        if (subId < 0) subId = -1;
+        if (subId != -1) Prefs.setCarrierSubId(context, subId);
+
         // "Antworte einfach auf diese SMS": reply to the sender if it is a real number.
         String to = Prefs.replyToSender(context) && isPhoneNumber(sender) ? sender : null;
         Prefs.log(context, "Carrier SMS from " + sender + " received, replying");
-        SmsSender.sendRefill(context, "carrier SMS", to);
+        SmsSender.sendRefill(context, "carrier SMS", to, subId);
     }
 
     /** True for numbers like +4915112345678 or 80808; false for names like "Lidl Connect". */

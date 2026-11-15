@@ -93,6 +93,11 @@ public class MainActivity extends Activity {
         Prefs.registerListener(this, prefsListener);
         refreshLog();
         refreshWarning();
+        // The timer can be killed from outside (e.g. Android's "Stop" in the
+        // active-apps list) while the switch still says on: start it again.
+        if (Prefs.timerEnabled(this) && !RefillService.isRunning()) {
+            RefillService.start(this);
+        }
     }
 
     @Override
@@ -127,6 +132,8 @@ public class MainActivity extends Activity {
                 senderFilter.getText().toString(),
                 keywordFilter.getText().toString(),
                 mins);
+        String shown = String.valueOf(Prefs.intervalMinutes(this));
+        if (!shown.equals(interval.getText().toString().trim())) interval.setText(shown);
     }
 
     private void refreshLog() {

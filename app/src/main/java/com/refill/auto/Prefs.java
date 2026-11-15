@@ -35,6 +35,8 @@ public final class Prefs {
     private static final String K_TIMER = "timer_enabled";
     private static final String K_INTERVAL = "interval_minutes";
     private static final String K_LAST_AUTO = "last_auto_reply";
+    private static final String K_LAST_TIMER = "last_timer_send";
+    private static final String K_CARRIER_SUB = "carrier_sub_id";
     private static final String K_LOG = "log";
 
     private Prefs() {}
@@ -73,6 +75,12 @@ public final class Prefs {
     public static boolean timerEnabled(Context c) { return sp(c).getBoolean(K_TIMER, false); }
     public static int intervalMinutes(Context c) { return Math.max(1, sp(c).getInt(K_INTERVAL, 1)); }
     public static long lastAutoReply(Context c) { return sp(c).getLong(K_LAST_AUTO, 0); }
+    /** When the timer last sent an SMS (wall clock), so a restart doesn't send again too soon. */
+    public static long lastTimerSend(Context c) { return sp(c).getLong(K_LAST_TIMER, 0); }
+    public static void setLastTimerSend(Context c, long t) { sp(c).edit().putLong(K_LAST_TIMER, t).apply(); }
+    /** SIM the carrier SMS last arrived on (-1 = unknown, use the default SMS SIM). */
+    public static int carrierSubId(Context c) { return sp(c).getInt(K_CARRIER_SUB, -1); }
+    public static void setCarrierSubId(Context c, int id) { sp(c).edit().putInt(K_CARRIER_SUB, id).apply(); }
 
     public static void saveText(Context c, String number, String message, String sender, String keyword, int interval) {
         sp(c).edit()

@@ -25,6 +25,10 @@ public class RefillService extends Service {
 
     private final Handler handler = new Handler(Looper.getMainLooper());
     private PowerManager.WakeLock wakeLock;
+    private static volatile boolean running = false;
+
+    /** True while the timer service is alive in this process. */
+    public static boolean isRunning() { return running; }
 
     private final Runnable tick = new Runnable() {
         @Override
@@ -33,8 +37,9 @@ public class RefillService extends Service {
                 stopSelf();
                 return;
             }
+            Prefs.setLastTimerSend(RefillService.this, System.currentTimeMillis());
             SmsSender.sendRefill(RefillService.this, "timer");
-            handler.postDelayed(this, Prefs.intervalMinutes(RefillService.this) * 60_000L);
+            handler.postDelayed(this, intervalMs());
         }
     };
 
@@ -46,9 +51,19 @@ public class RefillService extends Service {
         c.stopService(new Intent(c, RefillService.class));
     }
 
+    private long intervalMs() { return Prefs.intervalMinutes(this) * 60_000L; }
+
+    /** Time until the next SMS is due, counted from the last one the timer sent. */
+    private long delayUntilNext() {
+        long since = System.currentTimeMillis() - Prefs.lastTimerSend(this);
+        if (since < 0) return 0; // clock was changed
+        return Math.max(0, intervalMs() - since);
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
+        running = true;
         NotificationManager nm = getSystemService(NotificationManager.class);
         nm.createNotificationChannel(new NotificationChannel(
                 CHANNEL_ID, getString(R.string.channel_name), NotificationManager.IMPORTANCE_LOW));
@@ -69,19 +84,21 @@ public class RefillService extends Service {
         }
 
         handler.removeCallbacks(tick);
-        if (wakeLock == null) {
-            // Fresh start: send right away, then every interval.
+        boolean fresh = wakeLock == null;
+        if (fresh) {
             PowerManager pm = getSystemService(PowerManager.class);
             wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "RefillAuto:timer");
             wakeLock.setReferenceCounted(false);
             wakeLock.acquire(); // held until the timer is switched off (intentional)
-            Prefs.log(this, "Timer started (every " + Prefs.intervalMinutes(this) + " min)");
-            handler.post(tick);
-        } else {
-            // Already running (settings changed): pick up the new interval without an extra SMS.
-            Prefs.log(this, "Timer updated (every " + Prefs.intervalMinutes(this) + " min)");
-            handler.postDelayed(tick, Prefs.intervalMinutes(this) * 60_000L);
         }
+        // Send when due: right away if the last timer SMS is older than the interval,
+        // otherwise wait out the rest. So restarts (reboot, app killed, settings changed)
+        // never send early or twice.
+        long delay = delayUntilNext();
+        Prefs.log(this, (fresh ? "Timer started" : "Timer updated")
+                + " (every " + Prefs.intervalMinutes(this) + " min"
+                + (delay > 0 ? ", next in " + (delay + 999) / 1000 + " s)" : ")"));
+        handler.postDelayed(tick, delay);
         return START_STICKY;
     }
 
@@ -102,6 +119,7 @@ public class RefillService extends Service {
 
     @Override
     public void onDestroy() {
+        running = false;
         handler.removeCallbacks(tick);
         if (wakeLock != null && wakeLock.isHeld()) wakeLock.release();
         wakeLock = null;
