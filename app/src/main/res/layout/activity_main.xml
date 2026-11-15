@@ -75,7 +75,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:minHeight="48dp"
-            android:text="Reply to the number that sent it (otherwise use the number above)" />
+            android:text="Reply to the sender's number instead of the number above (Android may ask before texting a short number like 80808)" />
 
         <TextView style="@style/Label" android:text="…on a timer" />
 

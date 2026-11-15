@@ -50,8 +50,10 @@ public final class Prefs {
             migrated = true;
             // Move filters still on an older version's defaults to the current ones.
             // (1.0: sender "80808", no keyword. 1.1: any sender, "Unlimited-1GB, mit Refill".)
-            if (sp.getInt(K_SCHEMA, 1) < 3) {
-                SharedPreferences.Editor e = sp.edit().putInt(K_SCHEMA, 3);
+            if (sp.getInt(K_SCHEMA, 1) < 4) {
+                SharedPreferences.Editor e = sp.edit().putInt(K_SCHEMA, 4);
+                // 1.1/1.2 replied to the sender by default; switch to the fixed number.
+                e.remove(K_REPLY_TO_SENDER);
                 String sender = sp.getString(K_SENDER, null);
                 String keyword = sp.getString(K_KEYWORD, "");
                 boolean v10 = "80808".equals(sender) && keyword.isEmpty();
@@ -70,8 +72,12 @@ public final class Prefs {
     public static String senderFilter(Context c) { return sp(c).getString(K_SENDER, DEFAULT_SENDER_FILTER); }
     public static String keywordFilter(Context c) { return sp(c).getString(K_KEYWORD, DEFAULT_KEYWORD_FILTER); }
     public static boolean autoReply(Context c) { return sp(c).getBoolean(K_AUTO_REPLY, true); }
-    /** Reply to the number the carrier SMS came from, instead of the fixed number. */
-    public static boolean replyToSender(Context c) { return sp(c).getBoolean(K_REPLY_TO_SENDER, true); }
+    /**
+     * Reply to the number the carrier SMS came from, instead of the fixed number. Off by
+     * default: the sender often shows as the short code "80808", and Android asks for
+     * confirmation before an app texts a short code, which would stall the automation.
+     */
+    public static boolean replyToSender(Context c) { return sp(c).getBoolean(K_REPLY_TO_SENDER, false); }
     public static boolean timerEnabled(Context c) { return sp(c).getBoolean(K_TIMER, false); }
     public static int intervalMinutes(Context c) { return Math.max(1, sp(c).getInt(K_INTERVAL, 1)); }
     public static long lastAutoReply(Context c) { return sp(c).getLong(K_LAST_AUTO, 0); }
