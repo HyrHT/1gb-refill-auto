@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:id="@+id/warning"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#33FF5722"
+            android:padding="12dp"
+            android:layout_marginBottom="12dp"
+            android:visibility="gone" />
+
+        <TextView style="@style/Label" android:text="Send this SMS…" />
+
+        <EditText
+            android:id="@+id/number"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="To number"
+            android:inputType="phone" />
+
+        <EditText
+            android:id="@+id/message"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Message"
+            android:inputType="text" />
+
+        <Button
+            android:id="@+id/send_now"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Send now" />
+
+        <TextView style="@style/Label" android:text="…when the carrier texts me" />
+
+        <Switch
+            android:id="@+id/auto_reply"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="48dp"
+            android:text="Reply automatically to carrier SMS" />
+
+        <EditText
+            android:id="@+id/sender_filter"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Carrier sender contains (e.g. 80808)"
+            android:inputType="text" />
+
+        <EditText
+            android:id="@+id/keyword_filter"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Message contains (optional, comma-separated)"
+            android:inputType="text" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:alpha="0.7"
+            android:text="Replies when the sender matches AND (if filled in) the text contains one of the keywords. Leave the keyword blank to reply to every message from that sender." />
+
+        <TextView style="@style/Label" android:text="…on a timer" />
+
+        <Switch
+            android:id="@+id/timer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="48dp"
+            android:text="Send repeatedly" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Every" />
+
+            <EditText
+                android:id="@+id/interval"
+                android:layout_width="72dp"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:inputType="number" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="minute(s)" />
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/battery"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Let the timer run in the background" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                style="@style/Label"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_marginTop="0dp"
+                android:text="Activity" />
+
+            <Button
+                android:id="@+id/clear_log"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Clear" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/log"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="monospace"
+            android:textIsSelectable="true"
+            android:textSize="12sp" />
+    </LinearLayout>
+</ScrollView>
