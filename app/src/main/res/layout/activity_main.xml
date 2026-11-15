@@ -54,7 +54,7 @@
             android:id="@+id/sender_filter"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Carrier sender contains (optional)"
+            android:hint="Carrier sender contains (e.g. 80808)"
             android:inputType="text" />
 
         <EditText
@@ -68,7 +68,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:alpha="0.7"
-            android:text="Replies when the text contains one of the keywords (and, if filled in, the sender matches). Fill in at least one of the two." />
+            android:text="Replies when the sender matches AND the text contains one of the keywords. A blank field is ignored, but at least one must be filled in." />
 
         <Switch
             android:id="@+id/reply_to_sender"

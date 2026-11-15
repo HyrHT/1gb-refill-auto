@@ -12,13 +12,14 @@ public final class Prefs {
     public static final String DEFAULT_NUMBER = "+4980808";
     public static final String DEFAULT_MESSAGE = "Refill";
     /** Carrier messages are matched when the sender contains this text (blank = any sender). */
-    public static final String DEFAULT_SENDER_FILTER = "";
+    public static final String DEFAULT_SENDER_FILTER = "80808";
     /**
      * ...and the message body contains one of these (comma-separated, blank = any text).
      * Matches Lidl Connect's "Deine Unlimited-1GB Option ist fast verbraucht ... antworte
-     * einfach auf diese SMS mit Refill" message.
+     * einfach auf diese SMS mit Refill" message, but not confirmations that merely mention
+     * the option, so a confirmation can't trigger another reply.
      */
-    public static final String DEFAULT_KEYWORD_FILTER = "Unlimited-1GB, mit Refill";
+    public static final String DEFAULT_KEYWORD_FILTER = "mit Refill, fast verbraucht";
     /** Minimum gap between two automatic replies, so the app can never loop. */
     public static final long AUTO_REPLY_COOLDOWN_MS = 30_000;
 
@@ -45,11 +46,15 @@ public final class Prefs {
         SharedPreferences sp = c.getApplicationContext().getSharedPreferences(FILE, Context.MODE_PRIVATE);
         if (!migrated) {
             migrated = true;
-            // v1.0 defaulted to sender "80808" with no keyword; switch untouched v1.0 settings
-            // to matching the Lidl Connect message text instead.
-            if (sp.getInt(K_SCHEMA, 1) < 2) {
-                SharedPreferences.Editor e = sp.edit().putInt(K_SCHEMA, 2);
-                if ("80808".equals(sp.getString(K_SENDER, null)) && sp.getString(K_KEYWORD, "").isEmpty()) {
+            // Move filters still on an older version's defaults to the current ones.
+            // (1.0: sender "80808", no keyword. 1.1: any sender, "Unlimited-1GB, mit Refill".)
+            if (sp.getInt(K_SCHEMA, 1) < 3) {
+                SharedPreferences.Editor e = sp.edit().putInt(K_SCHEMA, 3);
+                String sender = sp.getString(K_SENDER, null);
+                String keyword = sp.getString(K_KEYWORD, "");
+                boolean v10 = "80808".equals(sender) && keyword.isEmpty();
+                boolean v11 = "".equals(sender) && "Unlimited-1GB, mit Refill".equals(keyword);
+                if (v10 || v11) {
                     e.putString(K_SENDER, DEFAULT_SENDER_FILTER).putString(K_KEYWORD, DEFAULT_KEYWORD_FILTER);
                 }
                 e.apply();

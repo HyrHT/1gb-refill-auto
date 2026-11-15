@@ -16,10 +16,18 @@ public class SmsReceiverTest {
         return SmsReceiver.matches(Prefs.DEFAULT_SENDER_FILTER, Prefs.DEFAULT_KEYWORD_FILTER, sender, body);
     }
 
-    @Test public void lidlMessageMatchesFromAnySender() {
-        assertTrue(matchesDefaults("80808", LIDL_SMS));
+    @Test public void lidlMessageFromLidlMatches() {
         assertTrue(matchesDefaults("+4980808", LIDL_SMS));
-        assertTrue(matchesDefaults("Lidl Connect", LIDL_SMS));
+        assertTrue(matchesDefaults("80808", LIDL_SMS));
+    }
+
+    @Test public void sameTextFromAnotherNumberDoesNotMatch() {
+        assertFalse(matchesDefaults("+4915112345678", LIDL_SMS));
+    }
+
+    @Test public void confirmationDoesNotTriggerAnotherReply() {
+        assertFalse(matchesDefaults("+4980808",
+                "Dein Refill war erfolgreich. Deine Unlimited-1GB Option wurde aufgeladen."));
     }
 
     @Test public void ordinaryMessagesDoNotMatch() {
