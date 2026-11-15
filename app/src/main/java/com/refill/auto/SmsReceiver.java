@@ -28,7 +28,7 @@ public class SmsReceiver extends BroadcastReceiver {
             if (p.getDisplayMessageBody() != null) body.append(p.getDisplayMessageBody());
         }
 
-        if (!matches(context, sender, body.toString())) return;
+        if (!matches(Prefs.senderFilter(context), Prefs.keywordFilter(context), sender, body.toString())) return;
 
         long now = System.currentTimeMillis();
         if (now - Prefs.lastAutoReply(context) < Prefs.AUTO_REPLY_COOLDOWN_MS) {
@@ -36,13 +36,21 @@ public class SmsReceiver extends BroadcastReceiver {
             return;
         }
         Prefs.setLastAutoReply(context, now);
+        // "Antworte einfach auf diese SMS": reply to the sender if it is a real number.
+        String to = Prefs.replyToSender(context) && isPhoneNumber(sender) ? sender : null;
         Prefs.log(context, "Carrier SMS from " + sender + " received, replying");
-        SmsSender.sendRefill(context, "carrier SMS");
+        SmsSender.sendRefill(context, "carrier SMS", to);
     }
 
-    static boolean matches(Context c, String sender, String body) {
-        String senderFilter = Prefs.senderFilter(c);
-        String keywordFilter = Prefs.keywordFilter(c);
+    /** True for numbers like +4915112345678 or 80808; false for names like "Lidl Connect". */
+    static boolean isPhoneNumber(String s) {
+        return s != null && s.replaceAll("[\\s\\-()]", "").matches("\\+?\\d{3,15}");
+    }
+
+    static boolean matches(String senderFilter, String keywordFilter, String sender, String body) {
+        senderFilter = senderFilter == null ? "" : senderFilter.trim();
+        keywordFilter = keywordFilter == null ? "" : keywordFilter.trim();
+        if (body == null) body = "";
 
         // Safety: with both filters blank we would answer every SMS, so do nothing.
         if (senderFilter.isEmpty() && keywordFilter.isEmpty()) return false;

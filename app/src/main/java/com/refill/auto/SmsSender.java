@@ -16,8 +16,13 @@ public final class SmsSender {
 
     /** @param reason short label for the log, e.g. "carrier SMS" or "timer". */
     public static void sendRefill(Context context, String reason) {
+        sendRefill(context, reason, null);
+    }
+
+    /** @param to number to text; null means the number from the settings. */
+    public static void sendRefill(Context context, String reason, String to) {
         Context c = context.getApplicationContext();
-        String number = Prefs.number(c);
+        String number = to != null ? to : Prefs.number(c);
         String message = Prefs.message(c);
 
         if (number.isEmpty() || message.isEmpty()) {

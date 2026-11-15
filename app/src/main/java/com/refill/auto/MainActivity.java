@@ -24,7 +24,7 @@ public class MainActivity extends Activity {
     private static final int REQ_PERMS = 1;
 
     private EditText number, message, senderFilter, keywordFilter, interval;
-    private Switch autoReply, timer;
+    private Switch autoReply, replyToSender, timer;
     private TextView log, warning;
 
     private final SharedPreferences.OnSharedPreferenceChangeListener prefsListener =
@@ -41,6 +41,7 @@ public class MainActivity extends Activity {
         keywordFilter = findViewById(R.id.keyword_filter);
         interval = findViewById(R.id.interval);
         autoReply = findViewById(R.id.auto_reply);
+        replyToSender = findViewById(R.id.reply_to_sender);
         timer = findViewById(R.id.timer);
         log = findViewById(R.id.log);
         warning = findViewById(R.id.warning);
@@ -51,6 +52,8 @@ public class MainActivity extends Activity {
         keywordFilter.setText(Prefs.keywordFilter(this));
         interval.setText(String.valueOf(Prefs.intervalMinutes(this)));
         autoReply.setChecked(Prefs.autoReply(this));
+        replyToSender.setChecked(Prefs.replyToSender(this));
+        replyToSender.setOnCheckedChangeListener((b, on) -> Prefs.setReplyToSender(this, on));
         timer.setChecked(Prefs.timerEnabled(this));
 
         autoReply.setOnCheckedChangeListener((b, on) -> {
