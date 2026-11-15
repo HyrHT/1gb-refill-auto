@@ -21,8 +21,14 @@ public class SmsSentReceiver extends BroadcastReceiver {
             result = "FAILED (no service): ";
         } else if (code == SmsManager.RESULT_ERROR_SHORT_CODE_NOT_ALLOWED
                 || code == SmsManager.RESULT_ERROR_SHORT_CODE_NEVER_ALLOWED) {
-            result = "FAILED (Android blocked texting a short number; send to the full "
-                    + "+49… number, or tap Send with \"Remember my choice\" on the prompt): ";
+            result = "FAILED (Android blocked texting a short number. Allow it: tap Send with "
+                    + "\"Remember my choice\" on the prompt, or Settings → Apps → Special app "
+                    + "access → Premium SMS access → Refill Auto → Always allow): ";
+        } else if (code == SmsManager.RESULT_RIL_NETWORK_ERR
+                || code == SmsManager.RESULT_RIL_NETWORK_REJECT
+                || code == SmsManager.RESULT_NETWORK_REJECT) {
+            result = "FAILED (network refused it, error " + code + ". Check the number: "
+                    + "use 80808, not +4980808): ";
         } else if (code == SmsManager.RESULT_ERROR_RADIO_OFF) {
             result = "FAILED (radio off / airplane mode): ";
         } else {

@@ -9,7 +9,12 @@ import java.util.Locale;
 
 /** All app settings plus a small activity log, stored in SharedPreferences. */
 public final class Prefs {
-    public static final String DEFAULT_NUMBER = "+4980808";
+    /**
+     * Lidl Connect's refill short code. Must be the short form: the network rejects
+     * "+4980808" (error 112, RESULT_RIL_NETWORK_ERR). Android asks once before an app
+     * texts a short code; "Always allow" is remembered.
+     */
+    public static final String DEFAULT_NUMBER = "80808";
     public static final String DEFAULT_MESSAGE = "Refill";
     /** Carrier messages are matched when the sender contains this text (blank = any sender). */
     public static final String DEFAULT_SENDER_FILTER = "80808";
@@ -50,8 +55,13 @@ public final class Prefs {
             migrated = true;
             // Move filters still on an older version's defaults to the current ones.
             // (1.0: sender "80808", no keyword. 1.1: any sender, "Unlimited-1GB, mit Refill".)
-            if (sp.getInt(K_SCHEMA, 1) < 4) {
-                SharedPreferences.Editor e = sp.edit().putInt(K_SCHEMA, 4);
+            if (sp.getInt(K_SCHEMA, 1) < 5) {
+                SharedPreferences.Editor e = sp.edit().putInt(K_SCHEMA, 5);
+                // Up to 1.3 the default was "+4980808", which the network rejects.
+                String num = sp.getString(K_NUMBER, null);
+                if (num != null && num.replaceAll("[\\s\\-]", "").equals("+4980808")) {
+                    e.putString(K_NUMBER, DEFAULT_NUMBER);
+                }
                 // 1.1/1.2 replied to the sender by default; switch to the fixed number.
                 e.remove(K_REPLY_TO_SENDER);
                 String sender = sp.getString(K_SENDER, null);
